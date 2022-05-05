@@ -15,7 +15,7 @@ from astree import (
     ArrayLiteral,
     IndexExpression,
     BlockStatement,
-    IfExpression,
+    IfExpression, FunctionLiteral, StringLiteral, HashLiteral,
 )
 from lexer import Lexer
 from tokens import TokenType, Token
@@ -48,6 +48,9 @@ class Parser:
             TokenType.LPAREN: self._parse_group_expression,
             TokenType.LBRACKET: self._parse_array_literal,
             TokenType.IF: self._parse_if_expression,
+            TokenType.FUNCTION: self._parse_function_literal,
+            TokenType.STRING: self._parse_string_literal,
+            TokenType.LBRACE: self._parse_hash_literal,
         }
         self._infix_parsers = {
             TokenType.PLUS: self._parse_infix_expression,
@@ -149,8 +152,8 @@ class Parser:
         left = prefix()
 
         while (
-            not self._peek_token_is(TokenType.SEMICOLON)
-            and precedence < self._peek_precedence()
+                not self._peek_token_is(TokenType.SEMICOLON)
+                and precedence < self._peek_precedence()
         ):
             infix = self._infix_parsers.get(self._peek_token.token_type, None)
             if infix is None:
@@ -300,7 +303,7 @@ class Parser:
         self._next_token()
 
         while not self._cur_token_is(TokenType.RBRACE) and not self._cur_token_is(
-            TokenType.EOF
+                TokenType.EOF
         ):
             statement = self._parse_statement()
             if statement is not None:
@@ -308,3 +311,61 @@ class Parser:
             self._next_token()
 
         return BlockStatement(token, statements)
+
+    def _parse_function_literal(self):
+        token = self._cur_token
+        if not self._expect_peek(TokenType.LPAREN):
+            return None
+
+        parameters = self._parse_function_parameters()
+
+        if not self._expect_peek(TokenType.LBRACE):
+            return None
+
+        body = self._parse_block_statement()
+        return FunctionLiteral(token, parameters, body)
+
+    def _peek_error(self, token_type):
+        self._errors.append(f"Expected next token to be {token_type}, got {self._peek_token.token_type} instead")
+
+    def _parse_function_parameters(self):
+        parameters = []
+        if self._peek_token_is(TokenType.RPAREN):
+            self._next_token()
+            return parameters
+
+        self._next_token()
+        token = self._cur_token
+
+        parameters.append(Identifier(token, token.literal))
+
+        while self._peek_token_is(TokenType.COMMA):
+            self._next_token()
+            self._next_token()
+            inner_token = self._cur_token
+            parameters.append(Identifier(inner_token, inner_token.literal))
+
+        if not self._expect_peek(TokenType.RPAREN):
+            return None
+
+        return parameters
+
+    def _parse_string_literal(self):
+        return StringLiteral(self._cur_token, self._cur_token.literal)
+
+    def _parse_hash_literal(self):
+        token = self._cur_token
+        pairs = {}
+        while not self._peek_token_is(TokenType.RBRACE):
+            self._next_token()
+            key = self._parse_expression(Precedence.LOWEST)
+            if not self._expect_peek(TokenType.COLON):
+                return None
+
+            self._next_token()
+            value = self._parse_expression(Precedence.LOWEST)
+            pairs[key] = value
+            if not self._peek_token_is(TokenType.RBRACE) and not self._expect_peek(TokenType.COMMA):
+                return None
+
+        return HashLiteral(token, pairs) if self._expect_peek(TokenType.RBRACE) else None

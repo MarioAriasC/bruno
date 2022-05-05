@@ -292,6 +292,79 @@ def test_if_else_expression():
     assert_identifier(alternative.expression, "y")
 
 
+def test_function_literal_parsing():
+    input_source = "fn(x, y) { x + y;}"
+    program = create_program(input_source)
+    count_statements(1, program)
+    function = program.statements[0].expression
+    assert_literal_expression(function.parameters[0], "x")
+    assert_literal_expression(function.parameters[1], "y")
+    assert 1 == len(function.body.statements)
+    assert_infix_expression(function.body.statements[0].expression, "x", "+", "y")
+
+
+def test_function_parameter_parsing():
+    tests = [
+        ("fn() {}", []),
+        ("fn(x) {}", ["x"]),
+        ("fn(x, y, z) {}", ["x", "y", "z"])
+    ]
+
+    for input_source, expected_params in tests:
+        program = create_program(input_source)
+        function = program.statements[0].expression
+        assert len(expected_params) == len(function.parameters)
+        for i, param in enumerate(expected_params):
+            assert_literal_expression(function.parameters[i], param)
+
+
+def test_call_expression_parsing():
+    input_source = "add(1, 2 * 3, 4+5)"
+    program = create_program(input_source)
+    count_statements(1, program)
+    exp = program.statements[0].expression
+    assert_identifier(exp.function, "add")
+    assert 3 == len(exp.arguments)
+    assert_literal_expression(exp.arguments[0], 1)
+    assert_infix_expression(exp.arguments[1], 2, "*", 3)
+    assert_infix_expression(exp.arguments[2], 4, "+", 5)
+
+
+def test_literal_expression():
+    input_source = '"hello world";'
+    program = create_program(input_source)
+    count_statements(1, program)
+    assert "hello world" == program.statements[0].expression.value
+
+
+def test_parsing_array_literal():
+    input_source = '[1, 2 * 2, 3 + 3]'
+    program = create_program(input_source)
+    array = program.statements[0].expression
+    assert_integer_literal(array.elements[0], 1)
+    assert_infix_expression(array.elements[1], 2, "*", 2)
+    assert_infix_expression(array.elements[2], 3, "+", 3)
+
+
+def test_parsing_index_expression():
+    input_source = "myArray[1 + 1]"
+    program = create_program(input_source)
+    index = program.statements[0].expression
+    assert_identifier(index.left, "myArray")
+    assert_infix_expression(index.index, 1, "+", 1)
+
+
+def test_hash_string_keys():
+    input_source = '{"one": 1, "two": 2, "three": 3}'
+    program = create_program(input_source)
+    hash_literal = program.statements[0].expression
+    assert 3 == len(hash_literal.pairs)
+    expected = {"one": 1, "two": 2, "three": 3}
+    for key, value in hash_literal.pairs.items():
+        expected_value = expected[str(key)]
+        assert_literal_expression(value, expected_value)
+
+
 def check_parser_errors(parser):
     errors = parser.errors()
     if len(errors) != 0:

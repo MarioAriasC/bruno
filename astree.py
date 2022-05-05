@@ -133,11 +133,11 @@ class PrefixExpression(Expression):
 
 class InfixExpression(Expression):
     def __init__(
-        self,
-        token: Token,
-        left: Expression | None,
-        operator: str,
-        right: Expression | None,
+            self,
+            token: Token,
+            left: Expression | None,
+            operator: str,
+            right: Expression | None,
     ):
         self._token = token
         self.left = left
@@ -153,10 +153,10 @@ class InfixExpression(Expression):
 
 class CallExpression(Expression):
     def __init__(
-        self,
-        token: Token,
-        function: Expression | None,
-        arguments: list[Expression | None] | None,
+            self,
+            token: Token,
+            function: Expression | None,
+            arguments: list[Expression | None] | None,
     ):
         self._token = token
         self.function = function
@@ -212,11 +212,11 @@ class BlockStatement(Statement):
 
 class IfExpression(Expression):
     def __init__(
-        self,
-        token: Token,
-        condition: Expression | None,
-        consequence: BlockStatement | None,
-        alternative: BlockStatement | None,
+            self,
+            token: Token,
+            condition: Expression | None,
+            consequence: BlockStatement | None,
+            alternative: BlockStatement | None,
     ):
         self._token = token
         self.condition = condition
@@ -229,3 +229,43 @@ class IfExpression(Expression):
     def __str__(self) -> str:
         alt = f"else {self.alternative}" if self.alternative is not None else ""
         return f"{self.condition} {self.consequence} {alt}"
+
+
+class FunctionLiteral(Expression):
+    def __init__(self, token: Token, parameters: list[Identifier] | None, body: BlockStatement | None):
+        self._token = token
+        self.parameters = parameters
+        self.body = body
+
+    def token(self) -> Token:
+        return self._token
+
+    def __str__(self) -> str:
+        return f"{self.token_literal()}({', '.join(str(parameter) for parameter in self.parameters)}) {self.body}"
+
+
+class StringLiteral(Expression):
+    def __init__(self, token: Token, value: str):
+        self._token = token
+        self.value = value
+
+    def token(self) -> Token:
+        return self._token
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __hash__(self):
+        return super.__hash__(self)
+
+
+class HashLiteral(Expression):
+    def __init__(self, token: Token, pairs: dict[Expression, Expression]):
+        self._token = token
+        self.pairs = pairs
+
+    def token(self) -> Token:
+        return self._token
+
+    def __str__(self) -> str:
+        return "{{0}}".format(", ".join(f"{key}:{self.pairs[key]}" for key in self.pairs.keys()))
