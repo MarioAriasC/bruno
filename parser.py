@@ -15,7 +15,10 @@ from astree import (
     ArrayLiteral,
     IndexExpression,
     BlockStatement,
-    IfExpression, FunctionLiteral, StringLiteral, HashLiteral,
+    IfExpression,
+    FunctionLiteral,
+    StringLiteral,
+    HashLiteral,
 )
 from lexer import Lexer
 from tokens import TokenType, Token
@@ -152,8 +155,8 @@ class Parser:
         left = prefix()
 
         while (
-                not self._peek_token_is(TokenType.SEMICOLON)
-                and precedence < self._peek_precedence()
+            not self._peek_token_is(TokenType.SEMICOLON)
+            and precedence < self._peek_precedence()
         ):
             infix = self._infix_parsers.get(self._peek_token.token_type, None)
             if infix is None:
@@ -303,7 +306,7 @@ class Parser:
         self._next_token()
 
         while not self._cur_token_is(TokenType.RBRACE) and not self._cur_token_is(
-                TokenType.EOF
+            TokenType.EOF
         ):
             statement = self._parse_statement()
             if statement is not None:
@@ -326,7 +329,9 @@ class Parser:
         return FunctionLiteral(token, parameters, body)
 
     def _peek_error(self, token_type):
-        self._errors.append(f"Expected next token to be {token_type}, got {self._peek_token.token_type} instead")
+        self._errors.append(
+            f"Expected next token to be {token_type}, got {self._peek_token.token_type} instead"
+        )
 
     def _parse_function_parameters(self):
         parameters = []
@@ -365,7 +370,11 @@ class Parser:
             self._next_token()
             value = self._parse_expression(Precedence.LOWEST)
             pairs[key] = value
-            if not self._peek_token_is(TokenType.RBRACE) and not self._expect_peek(TokenType.COMMA):
+            if not self._peek_token_is(TokenType.RBRACE) and not self._expect_peek(
+                TokenType.COMMA
+            ):
                 return None
 
-        return HashLiteral(token, pairs) if self._expect_peek(TokenType.RBRACE) else None
+        return (
+            HashLiteral(token, pairs) if self._expect_peek(TokenType.RBRACE) else None
+        )

@@ -304,11 +304,7 @@ def test_function_literal_parsing():
 
 
 def test_function_parameter_parsing():
-    tests = [
-        ("fn() {}", []),
-        ("fn(x) {}", ["x"]),
-        ("fn(x, y, z) {}", ["x", "y", "z"])
-    ]
+    tests = [("fn() {}", []), ("fn(x) {}", ["x"]), ("fn(x, y, z) {}", ["x", "y", "z"])]
 
     for input_source, expected_params in tests:
         program = create_program(input_source)
@@ -338,7 +334,7 @@ def test_literal_expression():
 
 
 def test_parsing_array_literal():
-    input_source = '[1, 2 * 2, 3 + 3]'
+    input_source = "[1, 2 * 2, 3 + 3]"
     program = create_program(input_source)
     array = program.statements[0].expression
     assert_integer_literal(array.elements[0], 1)
