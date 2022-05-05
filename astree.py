@@ -64,7 +64,6 @@ class LetStatement(Statement):
 
 
 class ExpressionStatement(Statement):
-
     def __init__(self, token: Token, expression: Expression | None):
         self._token = token
         self.expression = expression
@@ -81,14 +80,13 @@ class Program(Node):
         self.statements = statements
 
     def token_literal(self) -> str:
-        return '' if len(self.statements) == 0 else self.statements[0].token_literal()
+        return "" if len(self.statements) == 0 else self.statements[0].token_literal()
 
     def __str__(self) -> str:
-        return ''.join((str(statement) for statement in self.statements))
+        return "".join((str(statement) for statement in self.statements))
 
 
 class LiteralExpression(Expression):
-
     def __init__(self, token: Token, value):
         self._token = token
         self.value = value
@@ -109,7 +107,6 @@ class BooleanLiteral(LiteralExpression):
 
 
 class ReturnStatement(Statement):
-
     def __init__(self, token: Token, return_value: Expression | None):
         self._token = token
         self.return_value = return_value
@@ -118,7 +115,7 @@ class ReturnStatement(Statement):
         return self._token
 
     def __str__(self) -> str:
-        return f'{self.token_literal()} {self._return_value}'
+        return f"{self.token_literal()} {self._return_value}"
 
 
 class PrefixExpression(Expression):
@@ -131,11 +128,17 @@ class PrefixExpression(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f'({self.operator}{self.right})'
+        return f"({self.operator}{self.right})"
 
 
 class InfixExpression(Expression):
-    def __init__(self, token: Token, left: Expression | None, operator: str, right: Expression | None):
+    def __init__(
+        self,
+        token: Token,
+        left: Expression | None,
+        operator: str,
+        right: Expression | None,
+    ):
         self._token = token
         self.left = left
         self.operator = operator
@@ -145,11 +148,16 @@ class InfixExpression(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f'({self.left} {self.operator} {self.right})'
+        return f"({self.left} {self.operator} {self.right})"
 
 
 class CallExpression(Expression):
-    def __init__(self, token: Token, function: Expression | None, arguments: list[Expression | None] | None):
+    def __init__(
+        self,
+        token: Token,
+        function: Expression | None,
+        arguments: list[Expression | None] | None,
+    ):
         self._token = token
         self.function = function
         self.arguments = arguments
@@ -183,11 +191,10 @@ class IndexExpression(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f'({self.left}[{self.index}])'
+        return f"({self.left}[{self.index}])"
 
 
 class BlockStatement(Statement):
-
     def __init__(self, token: Token, statements: list[Statement | None] | None):
         self._token = token
         self.statements = statements
@@ -196,13 +203,21 @@ class BlockStatement(Statement):
         return self._token
 
     def __str__(self) -> str:
-        return '' if self.statements is None else ''.join(str(statement) for statement in self.statements)
+        return (
+            ""
+            if self.statements is None
+            else "".join(str(statement) for statement in self.statements)
+        )
 
 
 class IfExpression(Expression):
-
-    def __init__(self, token: Token, condition: Expression | None, consequence: BlockStatement | None,
-                 alternative: BlockStatement | None):
+    def __init__(
+        self,
+        token: Token,
+        condition: Expression | None,
+        consequence: BlockStatement | None,
+        alternative: BlockStatement | None,
+    ):
         self._token = token
         self.condition = condition
         self.consequence = consequence
@@ -212,5 +227,5 @@ class IfExpression(Expression):
         return self._token
 
     def __str__(self) -> str:
-        alt = f'else {self.alternative}' if self.alternative is not None else ''
-        return f'{self.condition} {self.consequence} {alt}'
+        alt = f"else {self.alternative}" if self.alternative is not None else ""
+        return f"{self.condition} {self.consequence} {alt}"

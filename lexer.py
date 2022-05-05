@@ -2,12 +2,12 @@ from tokens import Token, TokenType, lookup_ident
 
 
 def _is_identifier(char):
-    return char.isalpha() or char == '_'
+    return char.isalpha() or char == "_"
 
 
 class Lexer:
-    ZERO = ''
-    WHITE_SPACES = (' ', '\t', '\n', '\r')
+    ZERO = ""
+    WHITE_SPACES = (" ", "\t", "\n", "\r")
 
     def __init__(self, input_source):
         self._input = input_source
@@ -22,51 +22,59 @@ class Lexer:
         self._read_position = self._read_position + 1
 
     def next_token(self) -> Token:
-        def ends_with_equal(one_char: TokenType, two_chars: TokenType, duplicate_chars=True) -> Token:
-            if self._peak_char() != '=':
+        def ends_with_equal(
+            one_char: TokenType, two_chars: TokenType, duplicate_chars=True
+        ) -> Token:
+            if self._peak_char() != "=":
                 return self._token(one_char)
             current_char = self._ch
             self._read_char()
-            value = f'{current_char}{current_char}' if duplicate_chars else f'{current_char}{self._ch}'
+            value = (
+                f"{current_char}{current_char}"
+                if duplicate_chars
+                else f"{current_char}{self._ch}"
+            )
             return Token(two_chars, value)
 
         self._skip_whitespace()
 
         match self._ch:
-            case '=':
+            case "=":
                 r = ends_with_equal(TokenType.ASSIGN, TokenType.EQ)
-            case ';':
+            case ";":
                 r = self._token(TokenType.SEMICOLON)
-            case ':':
+            case ":":
                 r = self._token(TokenType.COLON)
-            case ',':
+            case ",":
                 r = self._token(TokenType.COMMA)
-            case '(':
+            case "(":
                 r = self._token(TokenType.LPAREN)
-            case ')':
+            case ")":
                 r = self._token(TokenType.RPAREN)
-            case '{':
+            case "{":
                 r = self._token(TokenType.LBRACE)
-            case '}':
+            case "}":
                 r = self._token(TokenType.RBRACE)
-            case '[':
+            case "[":
                 r = self._token(TokenType.LBRACKET)
-            case ']':
+            case "]":
                 r = self._token(TokenType.RBRACKET)
-            case '+':
+            case "+":
                 r = self._token(TokenType.PLUS)
-            case '-':
+            case "-":
                 r = self._token(TokenType.MINUS)
-            case '*':
+            case "*":
                 r = self._token(TokenType.ASTERISK)
-            case '/':
+            case "/":
                 r = self._token(TokenType.SLASH)
-            case '<':
+            case "<":
                 r = self._token(TokenType.LT)
-            case '>':
+            case ">":
                 r = self._token(TokenType.GT)
-            case '!':
-                r = ends_with_equal(TokenType.BANG, TokenType.NOT_EQ, duplicate_chars=False)
+            case "!":
+                r = ends_with_equal(
+                    TokenType.BANG, TokenType.NOT_EQ, duplicate_chars=False
+                )
             case Lexer.ZERO:
                 r = Token(TokenType.EOF, "")
             case '"':
@@ -83,7 +91,11 @@ class Lexer:
         return r
 
     def _peak_char(self):
-        return Lexer.ZERO if self._read_position >= len(self._input) else self._input[self._read_position]
+        return (
+            Lexer.ZERO
+            if self._read_position >= len(self._input)
+            else self._input[self._read_position]
+        )
 
     def _token(self, token_type):
         return Token(token_type, self._ch)
@@ -96,7 +108,7 @@ class Lexer:
         current_position = self._position
         while predicate(self._ch):
             self._read_char()
-        return self._input[current_position:self._position]
+        return self._input[current_position : self._position]
 
     def _read_identifier(self):
         return self._read_value(lambda ch: _is_identifier(ch))
@@ -111,4 +123,4 @@ class Lexer:
             if self._ch in ['"', Lexer.ZERO]:
                 break
 
-        return self._input[start:self._position]
+        return self._input[start : self._position]

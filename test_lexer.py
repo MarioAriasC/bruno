@@ -3,29 +3,31 @@ from tokens import TokenType
 
 
 def test_validate_lexer():
-    code = ('let five = 5;\n'
-            'let ten = 10;\n'
-            '\n'
-            'let add = fn(x, y) {\n'
-            '	x + y;\n'
-            '}\n'
-            '\n'
-            'let result = add(five, ten);\n'
-            '!-/*5;\n'
-            '5 < 10 > 5;\n'
-            '\n'
-            'if (5 < 10) {\n'
-            '	return true;\n'
-            '} else {\n'
-            '	return false;\n'
-            '}\n'
-            '\n'
-            '10 == 10;\n'
-            '10 != 9;   \n'
-            '"foobar"\n'
-            '"foo bar"     \n'
-            '[1,2];\n'
-            '{"foo":"bar"}')
+    code = (
+        "let five = 5;\n"
+        "let ten = 10;\n"
+        "\n"
+        "let add = fn(x, y) {\n"
+        "	x + y;\n"
+        "}\n"
+        "\n"
+        "let result = add(five, ten);\n"
+        "!-/*5;\n"
+        "5 < 10 > 5;\n"
+        "\n"
+        "if (5 < 10) {\n"
+        "	return true;\n"
+        "} else {\n"
+        "	return false;\n"
+        "}\n"
+        "\n"
+        "10 == 10;\n"
+        "10 != 9;   \n"
+        '"foobar"\n'
+        '"foo bar"     \n'
+        "[1,2];\n"
+        '{"foo":"bar"}'
+    )
 
     lexer = Lexer(code)
 

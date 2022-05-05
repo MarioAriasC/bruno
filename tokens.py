@@ -36,17 +36,17 @@ class TokenType(Enum):
     STRING = "STRING"
 
     def __repr__(self):
-        return f'<{self.__class__.__name__}.{self.name}>'
+        return f"<{self.__class__.__name__}.{self.name}>"
 
 
 KEYWORDS = {
-    'fn': TokenType.FUNCTION,
-    'let': TokenType.LET,
-    'true': TokenType.TRUE,
-    'false': TokenType.FALSE,
-    'if': TokenType.IF,
-    'else': TokenType.ELSE,
-    'return': TokenType.RETURN,
+    "fn": TokenType.FUNCTION,
+    "let": TokenType.LET,
+    "true": TokenType.TRUE,
+    "false": TokenType.FALSE,
+    "if": TokenType.IF,
+    "else": TokenType.ELSE,
+    "return": TokenType.RETURN,
 }
 
 

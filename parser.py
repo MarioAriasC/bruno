@@ -1,8 +1,22 @@
 from enum import auto, IntEnum
 
-from astree import Identifier, LetStatement, ExpressionStatement, Program, IntegerLiteral, BooleanLiteral, \
-    ReturnStatement, PrefixExpression, Expression, InfixExpression, CallExpression, ArrayLiteral, IndexExpression, \
-    BlockStatement, IfExpression
+from astree import (
+    Identifier,
+    LetStatement,
+    ExpressionStatement,
+    Program,
+    IntegerLiteral,
+    BooleanLiteral,
+    ReturnStatement,
+    PrefixExpression,
+    Expression,
+    InfixExpression,
+    CallExpression,
+    ArrayLiteral,
+    IndexExpression,
+    BlockStatement,
+    IfExpression,
+)
 from lexer import Lexer
 from tokens import TokenType, Token
 
@@ -33,7 +47,7 @@ class Parser:
             TokenType.MINUS: self._parse_prefix_expression,
             TokenType.LPAREN: self._parse_group_expression,
             TokenType.LBRACKET: self._parse_array_literal,
-            TokenType.IF: self._parse_if_expression
+            TokenType.IF: self._parse_if_expression,
         }
         self._infix_parsers = {
             TokenType.PLUS: self._parse_infix_expression,
@@ -59,7 +73,7 @@ class Parser:
             TokenType.SLASH: Precedence.PRODUCT,
             TokenType.ASTERISK: Precedence.PRODUCT,
             TokenType.LPAREN: Precedence.CALL,
-            TokenType.LBRACKET: Precedence.INDEX
+            TokenType.LBRACKET: Precedence.INDEX,
         }
 
     def errors(self):
@@ -134,7 +148,10 @@ class Parser:
 
         left = prefix()
 
-        while not self._peek_token_is(TokenType.SEMICOLON) and precedence < self._peek_precedence():
+        while (
+            not self._peek_token_is(TokenType.SEMICOLON)
+            and precedence < self._peek_precedence()
+        ):
             infix = self._infix_parsers.get(self._peek_token.token_type, None)
             if infix is None:
                 return left
@@ -163,7 +180,7 @@ class Parser:
             value = int(token.literal)
             return IntegerLiteral(token, value)
         except ValueError:
-            self._errors.append(f'could not parse {token.literal} as integer')
+            self._errors.append(f"could not parse {token.literal} as integer")
             return None
 
     def _parse_boolean_literal(self):
@@ -246,7 +263,11 @@ class Parser:
 
         index = self._parse_expression(Precedence.LOWEST)
 
-        return IndexExpression(token, left, index) if self._expect_peek(TokenType.RBRACKET) else None
+        return (
+            IndexExpression(token, left, index)
+            if self._expect_peek(TokenType.RBRACKET)
+            else None
+        )
 
     def _parse_if_expression(self):
         token = self._cur_token
@@ -278,7 +299,9 @@ class Parser:
         statements = []
         self._next_token()
 
-        while not self._cur_token_is(TokenType.RBRACE) and not self._cur_token_is(TokenType.EOF):
+        while not self._cur_token_is(TokenType.RBRACE) and not self._cur_token_is(
+            TokenType.EOF
+        ):
             statement = self._parse_statement()
             if statement is not None:
                 statements.append(statement)

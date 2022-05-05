@@ -37,14 +37,14 @@ def assert_literal_expression(value, expected_value):
     elif isinstance(expected_value, str):
         assert_identifier(value, expected_value)
     else:
-        raise AssertionError(f'type of value not handled. got={type(expected_value)!r}')
+        raise AssertionError(f"type of value not handled. got={type(expected_value)!r}")
 
 
 def test_let_statements():
     tests = [
         ("let x = 5;", "x", 5),
         ("let y = true;", "y", True),
-        ("let foobar = y;", "foobar", "y")
+        ("let foobar = y;", "foobar", "y"),
     ]
 
     for input_source, expected_identifier, expected_value in tests:
@@ -57,11 +57,7 @@ def test_let_statements():
 
 
 def test_return_statement():
-    tests = [
-        ("return 5;", 5),
-        ("return true;", True),
-        ("return foobar;", "foobar")
-    ]
+    tests = [("return 5;", 5), ("return true;", True), ("return foobar;", "foobar")]
 
     for input_source, expected_value in tests:
         program = create_program(input_source)
@@ -72,13 +68,13 @@ def test_return_statement():
 
 
 def test_identifier_expression():
-    input_source = 'foobar;'
+    input_source = "foobar;"
     program = create_program(input_source)
     count_statements(1, program)
     statement = program.statements[0]
     identifier = statement.expression
-    assert 'foobar' == identifier.value
-    assert 'foobar' == identifier.token_literal()
+    assert "foobar" == identifier.value
+    assert "foobar" == identifier.token_literal()
 
 
 def test_integer_literals():
@@ -92,7 +88,9 @@ def test_integer_literals():
             assert 5 == literal.value
             assert "5" == literal.token_literal()
         case _:
-            raise AssertionError(f"statement.expression not IntegerLiteral. got{type(literal)}")
+            raise AssertionError(
+                f"statement.expression not IntegerLiteral. got{type(literal)}"
+            )
 
 
 def test_parsing_prefix_expressions():
@@ -136,7 +134,9 @@ def test_parsing_infix_expressions():
     for input_source, left_value, operator, right_value in tests:
         program = create_program(input_source)
         count_statements(1, program)
-        assert_infix_expression(program.statements[0].expression, left_value, operator, right_value)
+        assert_infix_expression(
+            program.statements[0].expression, left_value, operator, right_value
+        )
 
 
 def test_operator_precedence():
@@ -258,10 +258,7 @@ def test_operator_precedence():
 
 
 def test_boolean_expression():
-    tests = [
-        ('true', True),
-        ('false', False)
-    ]
+    tests = [("true", True), ("false", False)]
 
     for input_source, expected_boolean in tests:
         program = create_program(input_source)
@@ -271,7 +268,7 @@ def test_boolean_expression():
 
 
 def test_if_expression():
-    input_source = 'if (x < y) { x }'
+    input_source = "if (x < y) { x }"
     exp = assert_if_expression(input_source)
     assert exp.alternative is None
 
@@ -280,26 +277,26 @@ def assert_if_expression(input_source):
     program = create_program(input_source)
     count_statements(1, program)
     exp = program.statements[0].expression
-    assert_infix_expression(exp.condition, 'x', '<', 'y')
+    assert_infix_expression(exp.condition, "x", "<", "y")
     assert 1 == len(exp.consequence.statements)
     consequence = exp.consequence.statements[0]
-    assert_identifier(consequence.expression, 'x')
+    assert_identifier(consequence.expression, "x")
     return exp
 
 
 def test_if_else_expression():
-    input_source = 'if (x < y) { x } else { y }'
+    input_source = "if (x < y) { x } else { y }"
     exp = assert_if_expression(input_source)
     assert 1 == len(exp.alternative.statements)
     alternative = exp.alternative.statements[0]
-    assert_identifier(alternative.expression, 'y')
+    assert_identifier(alternative.expression, "y")
 
 
 def check_parser_errors(parser):
     errors = parser.errors()
     if len(errors) != 0:
-        jump = ' \n'
-        raise AssertionError(f'parser has {len(errors)} errors: \n{jump.join(errors)}')
+        jump = " \n"
+        raise AssertionError(f"parser has {len(errors)} errors: \n{jump.join(errors)}")
 
 
 def create_program(input_source):
