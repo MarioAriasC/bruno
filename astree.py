@@ -171,11 +171,11 @@ class InfixExpression(Expression):
     __match_args__ = ("left", "operator", "right")
 
     def __init__(
-            self,
-            token: Token,
-            left: Expression | None,
-            operator: str,
-            right: Expression | None,
+        self,
+        token: Token,
+        left: Expression | None,
+        operator: str,
+        right: Expression | None,
     ):
         self._token = token
         self.left = left
@@ -196,10 +196,10 @@ class CallExpression(Expression):
     __match_args__ = ("function", "arguments")
 
     def __init__(
-            self,
-            token: Token,
-            function: Expression | None,
-            arguments: list[Expression | None] | None,
+        self,
+        token: Token,
+        function: Expression | None,
+        arguments: list[Expression | None] | None,
     ):
         self._token = token
         self.function = function
@@ -271,11 +271,11 @@ class BlockStatement(Statement):
 
 class IfExpression(Expression):
     def __init__(
-            self,
-            token: Token,
-            condition: Expression | None,
-            consequence: BlockStatement | None,
-            alternative: BlockStatement | None,
+        self,
+        token: Token,
+        condition: Expression | None,
+        consequence: BlockStatement | None,
+        alternative: BlockStatement | None,
     ):
         self._token = token
         self.condition = condition
@@ -297,10 +297,10 @@ class FunctionLiteral(Expression):
     __match_args__ = ("parameters", "body")
 
     def __init__(
-            self,
-            token: Token,
-            parameters: list[Identifier] | None,
-            body: BlockStatement | None,
+        self,
+        token: Token,
+        parameters: list[Identifier] | None,
+        body: BlockStatement | None,
     ):
         self._token = token
         self.parameters = parameters

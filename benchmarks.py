@@ -9,7 +9,8 @@ def _measure(body):
 
 
 def _fast_input(size):
-    return """
+    return (
+        """
     let fibonacci = fn(x) {
     if (x < 2) {
     	return x;
@@ -17,4 +18,7 @@ def _fast_input(size):
     	fibonacci(x - 1) + fibonacci(x - 2);
     }
 };
-fibonacci(""" + size + """);"""
+fibonacci("""
+        + size
+        + """);"""
+    )

@@ -13,7 +13,9 @@ def assert_integer_object(evaluated, expected):
         case MInteger():
             assert expected == evaluated.value
         case _:
-            raise AssertionError(f"obj is not MInteger, got {type(evaluated)}, {evaluated}")
+            raise AssertionError(
+                f"obj is not MInteger, got {type(evaluated)}, {evaluated}"
+            )
 
 
 def assert_integer(input_source, expected):
@@ -50,7 +52,9 @@ def assert_boolean(input_source, expected):
         case MBoolean(value):
             assert expected == value
         case _:
-            raise AssertionError(f"obj is not MBoolean, got {type(evaluated)}, {evaluated}")
+            raise AssertionError(
+                f"obj is not MBoolean, got {type(evaluated)}, {evaluated}"
+            )
 
 
 def test_eval_boolean_expression():
@@ -123,28 +127,37 @@ def test_return_statement():
         ("return 10; 9;", 10),
         ("return 2 * 5; 9;", 10),
         ("9; return 2 * 5; 9;", 10),
-        ("""if (10 > 1) {
+        (
+            """if (10 > 1) {
             if (10 > 1) {
             return 10;
             }
         
             return 1;
-            }""", 10),
-        ("""let f = fn(x) {
+            }""",
+            10,
+        ),
+        (
+            """let f = fn(x) {
                 return x;
                 x + 10;
             
             };
             f(10);
-            """, 10),
-        ("""let f = fn(x) {
+            """,
+            10,
+        ),
+        (
+            """let f = fn(x) {
             let
             result = x + 10;
             return result;
             return 10;
             };
             f(10);
-            """, 20)
+            """,
+            20,
+        ),
     ]
 
     for input_source, expected in tests:
@@ -157,18 +170,9 @@ def test_error_handling():
         ("5 + true; 5;", "type mismatch: MInteger + MBoolean"),
         ("-true", "unknown operator: -MBoolean"),
         ("true + false;", "unknown operator: MBoolean + MBoolean"),
-        (
-            "true + false + true + false;",
-            "unknown operator: MBoolean + MBoolean"
-        ),
-        (
-            "5; true + false; 5",
-            "unknown operator: MBoolean + MBoolean"
-        ),
-        (
-            "if (10 > 1) { true + false; }",
-            "unknown operator: MBoolean + MBoolean"
-        ),
+        ("true + false + true + false;", "unknown operator: MBoolean + MBoolean"),
+        ("5; true + false; 5", "unknown operator: MBoolean + MBoolean"),
+        ("if (10 > 1) { true + false; }", "unknown operator: MBoolean + MBoolean"),
         (
             """
             if (10 > 1) {
@@ -177,20 +181,11 @@ def test_error_handling():
             }
             
             return 1;}""",
-            "unknown operator: MBoolean + MBoolean"
+            "unknown operator: MBoolean + MBoolean",
         ),
-        (
-            "foobar",
-            "identifier not found: foobar"
-        ),
-        (
-            '("Hello" - "World")',
-            "unknown operator: MString - MString"
-        ),
-        (
-            '{"name": "Monkey"}[fn(x) {x}];',
-            "unusable as a hash key: MFunction"
-        ),
+        ("foobar", "identifier not found: foobar"),
+        ('("Hello" - "World")', "unknown operator: MString - MString"),
+        ('{"name": "Monkey"}[fn(x) {x}];', "unusable as a hash key: MFunction"),
     ]
 
     for input_source, expected in tests:
@@ -255,7 +250,9 @@ def assert_string(input_source, expected):
         case MString(value):
             assert expected == value
         case _:
-            raise AssertionError(f"obj is not MString, got {type(evaluated)}, {evaluated}")
+            raise AssertionError(
+                f"obj is not MString, got {type(evaluated)}, {evaluated}"
+            )
 
 
 def test_string_literal():
@@ -310,46 +307,16 @@ def test_array_literal():
 
 def test_array_index_expression():
     tests = [
-        (
-            "[1, 2, 3][0]",
-            1
-        ),
-        (
-            "[1, 2, 3][1]",
-            2
-        ),
-        (
-            "[1, 2, 3][2]",
-            3
-        ),
-        (
-            "let i = 0; [1][i];",
-            1
-        ),
-        (
-            "[1, 2, 3][1 + 1];",
-            3
-        ),
-        (
-            "let myArray = [1, 2, 3]; myArray[2];",
-            3
-        ),
-        (
-            "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];",
-            6
-        ),
-        (
-            "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]",
-            2
-        ),
-        (
-            "[1, 2, 3][3]",
-            None
-        ),
-        (
-            "[1, 2, 3][-1]",
-            None
-        ),
+        ("[1, 2, 3][0]", 1),
+        ("[1, 2, 3][1]", 2),
+        ("[1, 2, 3][2]", 3),
+        ("let i = 0; [1][i];", 1),
+        ("[1, 2, 3][1 + 1];", 3),
+        ("let myArray = [1, 2, 3]; myArray[2];", 3),
+        ("let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6),
+        ("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2),
+        ("[1, 2, 3][3]", None),
+        ("[1, 2, 3][-1]", None),
     ]
 
     for input_source, expected in tests:
@@ -378,7 +345,7 @@ def test_hash_literal():
         MString("three").hash_key(): 3,
         MInteger(4).hash_key(): 4,
         TRUE.hash_key(): 5,
-        FALSE.hash_key(): 6
+        FALSE.hash_key(): 6,
     }
     assert 6 == len(expected)
     assert len(result.pairs) == len(expected)

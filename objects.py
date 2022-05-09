@@ -91,7 +91,6 @@ class MError(MObject):
 
 
 class MString(Hashable):
-
     def hash_type(self) -> HashType:
         return HashType.STRING
 
@@ -100,7 +99,6 @@ class MString(Hashable):
 
 
 class MBoolean(Hashable):
-
     @staticmethod
     def from_bool(value: bool):
         return TRUE if value else FALSE
@@ -146,7 +144,6 @@ class MFunction(MObject):
 
 
 class MBuiltinFunction(MObject):
-
     def __init__(self, fn):
         self.fn = fn
 
@@ -171,7 +168,9 @@ class MHash(MObject):
         self.pairs = pairs
 
     def __repr__(self):
-        return "{{0}}".format(str({f"{key!r}:{value!r}" for key, value in self.pairs.items()}))
+        return "{{0}}".format(
+            str({f"{key!r}:{value!r}" for key, value in self.pairs.items()})
+        )
 
 
 def _arg_size_check(expected_size, args, body):
@@ -188,7 +187,9 @@ def _array_check(name, args, body):
         case MArray():
             return body(array, len(array.elements))
         case _:
-            return MError(f"argument to `{name}` must be ARRAY, got {array.type_desc()}")
+            return MError(
+                f"argument to `{name}` must be ARRAY, got {array.type_desc()}"
+            )
 
 
 def _len(args):
@@ -210,21 +211,27 @@ def _push(args):
         array.elements.append(args[1])
         return MArray(array.elements)
 
-    return _arg_size_check(2, args, lambda arguments: _array_check(PUSH_NAME, arguments, body))
+    return _arg_size_check(
+        2, args, lambda arguments: _array_check(PUSH_NAME, arguments, body)
+    )
 
 
 def _first(args):
     def body(array, length):
         return array.elements[0] if length > 0 else NULL
 
-    return _arg_size_check(1, args, lambda arguments: _array_check(FIRST_NAME, arguments, body))
+    return _arg_size_check(
+        1, args, lambda arguments: _array_check(FIRST_NAME, arguments, body)
+    )
 
 
 def _last(args):
     def body(array, length):
         return array.elements[length - 1] if length > 0 else NULL
 
-    return _arg_size_check(1, args, lambda arguments: _array_check(LAST_NAME, arguments, body))
+    return _arg_size_check(
+        1, args, lambda arguments: _array_check(LAST_NAME, arguments, body)
+    )
 
 
 def _rest(args):
@@ -234,7 +241,9 @@ def _rest(args):
         del array.elements[0]
         return MArray(array.elements)
 
-    return _arg_size_check(1, args, lambda arguments: _array_check(REST_NAME, arguments, body))
+    return _arg_size_check(
+        1, args, lambda arguments: _array_check(REST_NAME, arguments, body)
+    )
 
 
 LEN_NAME = "len"
@@ -242,8 +251,10 @@ PUSH_NAME = "push"
 FIRST_NAME = "first"
 LAST_NAME = "last"
 REST_NAME = "rest"
-BUILTINS = {LEN_NAME: MBuiltinFunction(_len),
-            PUSH_NAME: MBuiltinFunction(_push),
-            FIRST_NAME: MBuiltinFunction(_first),
-            LAST_NAME: MBuiltinFunction(_last),
-            REST_NAME: MBuiltinFunction(_rest)}
+BUILTINS = {
+    LEN_NAME: MBuiltinFunction(_len),
+    PUSH_NAME: MBuiltinFunction(_push),
+    FIRST_NAME: MBuiltinFunction(_first),
+    LAST_NAME: MBuiltinFunction(_last),
+    REST_NAME: MBuiltinFunction(_rest),
+}

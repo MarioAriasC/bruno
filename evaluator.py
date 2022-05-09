@@ -1,8 +1,43 @@
-from astree import Node, Program, Statement, IntegerLiteral, ExpressionStatement, PrefixExpression, InfixExpression, \
-    BooleanLiteral, IfExpression, BlockStatement, ReturnStatement, CallExpression, LetStatement, FunctionLiteral, \
-    Identifier, StringLiteral, IndexExpression, HashLiteral, ArrayLiteral
-from objects import MReturnValue, MError, MInteger, MObject, MString, TRUE, FALSE, MBoolean, NULL, MNull, MFunction, \
-    MBuiltinFunction, BUILTINS, MArray, MHash, MValue, HashKey
+from astree import (
+    Node,
+    Program,
+    Statement,
+    IntegerLiteral,
+    ExpressionStatement,
+    PrefixExpression,
+    InfixExpression,
+    BooleanLiteral,
+    IfExpression,
+    BlockStatement,
+    ReturnStatement,
+    CallExpression,
+    LetStatement,
+    FunctionLiteral,
+    Identifier,
+    StringLiteral,
+    IndexExpression,
+    HashLiteral,
+    ArrayLiteral,
+)
+from objects import (
+    MReturnValue,
+    MError,
+    MInteger,
+    MObject,
+    MString,
+    TRUE,
+    FALSE,
+    MBoolean,
+    NULL,
+    MNull,
+    MFunction,
+    MBuiltinFunction,
+    BUILTINS,
+    MArray,
+    MHash,
+    MValue,
+    HashKey,
+)
 
 
 class Environment:
@@ -82,11 +117,15 @@ def _eval_infix_expression(operator: str, left: MObject, right: MObject):
         case (_, "!=", _):
             return _to_monkey(left != right)
         case (_, _, _) if left.type_desc() != right.type_desc():
-            return MError(f"type mismatch: {left.type_desc()} {operator} {right.type_desc()}")
+            return MError(
+                f"type mismatch: {left.type_desc()} {operator} {right.type_desc()}"
+            )
         case (MString(), "+", MString()):
             return left + right
         case (_, _, _):
-            return MError(f"unknown operator: {left.type_desc()} {operator} {right.type_desc()}")
+            return MError(
+                f"unknown operator: {left.type_desc()} {operator} {right.type_desc()}"
+            )
 
 
 def _to_monkey(value: bool):
@@ -225,9 +264,13 @@ def evaluate(node: Node, env: Environment):
         case IntegerLiteral(value):
             return MInteger(value)
         case InfixExpression(left, operator, right):
-            return _if_not_error(evaluate(left, env), lambda l: _if_not_error(evaluate(right, env),
-                                                                              lambda r: _eval_infix_expression(operator,
-                                                                                                               l, r)))
+            return _if_not_error(
+                evaluate(left, env),
+                lambda l: _if_not_error(
+                    evaluate(right, env),
+                    lambda r: _eval_infix_expression(operator, l, r),
+                ),
+            )
         case BlockStatement():
             return _eval_block_statement(node, env)
         case ExpressionStatement(expression):
@@ -235,6 +278,7 @@ def evaluate(node: Node, env: Environment):
         case IfExpression():
             return _eval_if_expression(node, env)
         case CallExpression(function, arguments):
+
             def body(f):
                 args = _eval_expressions(arguments, env)
                 if len(args) == 1 and _error(args[0]):
@@ -246,10 +290,13 @@ def evaluate(node: Node, env: Environment):
         case ReturnStatement(value):
             return _if_not_error(evaluate(value, env), lambda r: MReturnValue(r))
         case PrefixExpression(operator, right):
-            return _if_not_error(evaluate(right, env), lambda r: _eval_prefix_expression(operator, r))
+            return _if_not_error(
+                evaluate(right, env), lambda r: _eval_prefix_expression(operator, r)
+            )
         case BooleanLiteral(value):
             return _to_monkey(value)
         case LetStatement(name, value):
+
             def body(val):
                 env[name.value] = val
 
