@@ -16,8 +16,9 @@ class Node(ABC):
     def __eq__(self, other):
         return str(other) == str(self) if other is not None else False
 
+    @abc.abstractmethod
     def __hash__(self):
-        hash(str(self))
+        pass
 
 
 class Statement(Node):
@@ -39,6 +40,8 @@ class Expression(Node):
 
 
 class Identifier(Expression):
+    __match_args__ = ("value",)
+
     def __init__(self, token: Token, value: str):
         self._token = token
         self.value = value
@@ -49,8 +52,13 @@ class Identifier(Expression):
     def token(self) -> Token:
         return self._token
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class LetStatement(Statement):
+    __match_args__ = ("name", "value")
+
     def __init__(self, token: Token, name: Identifier, value: Expression | None):
         self._token = token
         self.name = name
@@ -62,8 +70,13 @@ class LetStatement(Statement):
     def __str__(self) -> str:
         return f"{self.token_literal()} {self.name} = {self.value}"
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class ExpressionStatement(Statement):
+    __match_args__ = ("expression",)
+
     def __init__(self, token: Token, expression: Expression | None):
         self._token = token
         self.expression = expression
@@ -74,8 +87,13 @@ class ExpressionStatement(Statement):
     def __str__(self) -> str:
         return str(self.expression)
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class Program(Node):
+    __match_args__ = ("statements",)
+
     def __init__(self, statements: list[Statement]):
         self.statements = statements
 
@@ -85,8 +103,13 @@ class Program(Node):
     def __str__(self) -> str:
         return "".join((str(statement) for statement in self.statements))
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class LiteralExpression(Expression):
+    __match_args__ = ("value",)
+
     def __init__(self, token: Token, value):
         self._token = token
         self.value = value
@@ -96,6 +119,9 @@ class LiteralExpression(Expression):
 
     def __str__(self) -> str:
         return self.token().literal
+
+    def __hash__(self):
+        return hash(str(self))
 
 
 class IntegerLiteral(LiteralExpression):
@@ -107,6 +133,8 @@ class BooleanLiteral(LiteralExpression):
 
 
 class ReturnStatement(Statement):
+    __match_args__ = ("return_value",)
+
     def __init__(self, token: Token, return_value: Expression | None):
         self._token = token
         self.return_value = return_value
@@ -115,10 +143,15 @@ class ReturnStatement(Statement):
         return self._token
 
     def __str__(self) -> str:
-        return f"{self.token_literal()} {self._return_value}"
+        return f"{self.token_literal()} {self.return_value}"
+
+    def __hash__(self):
+        return hash(str(self))
 
 
 class PrefixExpression(Expression):
+    __match_args__ = ("operator", "right")
+
     def __init__(self, token: Token, operator: str, right: Expression | None):
         self._token = token
         self.operator = operator
@@ -130,14 +163,19 @@ class PrefixExpression(Expression):
     def __str__(self) -> str:
         return f"({self.operator}{self.right})"
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class InfixExpression(Expression):
+    __match_args__ = ("left", "operator", "right")
+
     def __init__(
-        self,
-        token: Token,
-        left: Expression | None,
-        operator: str,
-        right: Expression | None,
+            self,
+            token: Token,
+            left: Expression | None,
+            operator: str,
+            right: Expression | None,
     ):
         self._token = token
         self.left = left
@@ -150,13 +188,18 @@ class InfixExpression(Expression):
     def __str__(self) -> str:
         return f"({self.left} {self.operator} {self.right})"
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class CallExpression(Expression):
+    __match_args__ = ("function", "arguments")
+
     def __init__(
-        self,
-        token: Token,
-        function: Expression | None,
-        arguments: list[Expression | None] | None,
+            self,
+            token: Token,
+            function: Expression | None,
+            arguments: list[Expression | None] | None,
     ):
         self._token = token
         self.function = function
@@ -168,8 +211,13 @@ class CallExpression(Expression):
     def __str__(self) -> str:
         return f'{self.function}({", ".join(str(argument) for argument in self.arguments)})'
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class ArrayLiteral(Expression):
+    __match_args__ = ("elements",)
+
     def __init__(self, token: Token, elements: list[Expression | None] | None):
         self._token = token
         self.elements = elements
@@ -180,8 +228,13 @@ class ArrayLiteral(Expression):
     def __str__(self) -> str:
         return f'[{", ".join(str(element) for element in self.elements)}]'
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class IndexExpression(Expression):
+    __match_args__ = ("left", "index")
+
     def __init__(self, token: Token, left: Expression | None, index: Expression | None):
         self._token = token
         self.left = left
@@ -192,6 +245,9 @@ class IndexExpression(Expression):
 
     def __str__(self) -> str:
         return f"({self.left}[{self.index}])"
+
+    def __hash__(self):
+        return hash(str(self))
 
 
 class BlockStatement(Statement):
@@ -209,14 +265,17 @@ class BlockStatement(Statement):
             else "".join(str(statement) for statement in self.statements)
         )
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class IfExpression(Expression):
     def __init__(
-        self,
-        token: Token,
-        condition: Expression | None,
-        consequence: BlockStatement | None,
-        alternative: BlockStatement | None,
+            self,
+            token: Token,
+            condition: Expression | None,
+            consequence: BlockStatement | None,
+            alternative: BlockStatement | None,
     ):
         self._token = token
         self.condition = condition
@@ -230,13 +289,18 @@ class IfExpression(Expression):
         alt = f"else {self.alternative}" if self.alternative is not None else ""
         return f"{self.condition} {self.consequence} {alt}"
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class FunctionLiteral(Expression):
+    __match_args__ = ("parameters", "body")
+
     def __init__(
-        self,
-        token: Token,
-        parameters: list[Identifier] | None,
-        body: BlockStatement | None,
+            self,
+            token: Token,
+            parameters: list[Identifier] | None,
+            body: BlockStatement | None,
     ):
         self._token = token
         self.parameters = parameters
@@ -248,8 +312,13 @@ class FunctionLiteral(Expression):
     def __str__(self) -> str:
         return f"{self.token_literal()}({', '.join(str(parameter) for parameter in self.parameters)}) {self.body}"
 
+    def __hash__(self):
+        return hash(str(self))
+
 
 class StringLiteral(Expression):
+    __match_args__ = ("value",)
+
     def __init__(self, token: Token, value: str):
         self._token = token
         self.value = value
@@ -261,10 +330,12 @@ class StringLiteral(Expression):
         return self.value
 
     def __hash__(self):
-        return super.__hash__(self)
+        return hash(str(self))
 
 
 class HashLiteral(Expression):
+    __match_args__ = ("pairs",)
+
     def __init__(self, token: Token, pairs: dict[Expression, Expression]):
         self._token = token
         self.pairs = pairs
@@ -276,3 +347,6 @@ class HashLiteral(Expression):
         return "{{0}}".format(
             ", ".join(f"{key}:{self.pairs[key]}" for key in self.pairs.keys())
         )
+
+    def __hash__(self):
+        return hash(str(self))
