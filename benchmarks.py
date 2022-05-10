@@ -14,7 +14,7 @@ def _measure(body):
 
 def _fast_input(size):
     return (
-            """
+        """
         let fibonacci = fn(x) {
         if (x < 2) {
             return x;
@@ -23,8 +23,8 @@ def _fast_input(size):
         }
     };
     fibonacci("""
-            + str(size)
-            + """);"""
+        + str(size)
+        + """);"""
     )
 
 
@@ -39,5 +39,5 @@ def main():
     _measure(lambda: evaluate(_parse(_fast_input(35)), env))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

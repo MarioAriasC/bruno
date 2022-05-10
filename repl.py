@@ -25,5 +25,5 @@ def main():
             print(f"{evaluated!r}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
