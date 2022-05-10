@@ -12,7 +12,7 @@ Pepa has many sibling implementations
 
 ## Status
 
-The book ([Writing An Interpreter In Go](https://interpreterbook.com/)) is fully implemented. Pepa will not have a
+The book ([Writing An Interpreter In Go](https://interpreterbook.com/)) is fully implemented. Bruno will not have a
 compiler implementation
 
 ## Commands
