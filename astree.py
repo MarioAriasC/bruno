@@ -287,7 +287,7 @@ class IfExpression(Expression):
 
     def __str__(self) -> str:
         alt = f"else {self.alternative}" if self.alternative is not None else ""
-        return f"{self.condition} {self.consequence} {alt}"
+        return f"if({self.condition}) {self.consequence} {alt}"
 
     def __hash__(self):
         return hash(str(self))

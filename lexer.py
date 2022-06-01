@@ -23,7 +23,7 @@ class Lexer:
 
     def next_token(self) -> Token:
         def ends_with_equal(
-            one_char: TokenType, two_chars: TokenType, duplicate_chars=True
+                one_char: TokenType, two_chars: TokenType, duplicate_chars=True
         ) -> Token:
             if self._peak_char() != "=":
                 return self._token(one_char)
@@ -83,10 +83,10 @@ class Lexer:
                 if _is_identifier(self._ch):
                     identifier = self._read_identifier()
                     return Token(lookup_ident(identifier), identifier)
-                elif self._ch.isdigit():
+                if self._ch.isdigit():
                     return Token(TokenType.INT, self._read_number())
-                else:
-                    return Token(TokenType.ILLEGAL, self._ch)
+                # else
+                return Token(TokenType.ILLEGAL, self._ch)
         self._read_char()
         return r
 
@@ -108,10 +108,10 @@ class Lexer:
         current_position = self._position
         while predicate(self._ch):
             self._read_char()
-        return self._input[current_position : self._position]
+        return self._input[current_position: self._position]
 
     def _read_identifier(self):
-        return self._read_value(lambda ch: _is_identifier(ch))
+        return self._read_value(_is_identifier)
 
     def _read_number(self):
         return self._read_value(lambda ch: ch.isdigit())
@@ -123,4 +123,4 @@ class Lexer:
             if self._ch in ['"', Lexer.ZERO]:
                 break
 
-        return self._input[start : self._position]
+        return self._input[start: self._position]

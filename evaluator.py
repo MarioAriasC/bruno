@@ -36,7 +36,7 @@ from objects import (
     MArray,
     MHash,
     MValue,
-    HashKey,
+    HashKey, HashPair,
 )
 
 
@@ -65,6 +65,18 @@ def _eval_program(statements: list[Statement], env):
     return result
 
 
+def _eval_block_statement(block_statement: BlockStatement, env):
+    result = None
+    for statement in block_statement.statements:
+        result = evaluate(statement, env)
+        match result:
+            case MReturnValue():
+                return result
+            case MError():
+                return result
+    return result
+
+
 def _eval_minus_prefix_operator_expression(right):
     if right is None:
         return None
@@ -79,8 +91,8 @@ def _eval_minus_prefix_operator_expression(right):
 def _eval_bang_operator_expression(right):
     if right is TRUE or right is not FALSE and right is not NULL:
         return FALSE
-    else:
-        return TRUE
+    # else:
+    return TRUE
 
 
 def _eval_prefix_expression(operator, right):
@@ -136,36 +148,24 @@ def _eval_if_expression(if_expression: IfExpression, env):
     def body(condition):
         if _is_truthy(condition):
             return evaluate(if_expression.consequence, env)
-        elif if_expression.alternative is not None:
+        if if_expression.alternative is not None:
             return evaluate(if_expression.alternative, env)
-        else:
-            return NULL
+        # else:
+        return NULL
 
     return _if_not_error(evaluate(if_expression.condition, env), body)
-
-
-def _eval_block_statement(block_statement: BlockStatement, env):
-    result = None
-    for statement in block_statement.statements:
-        result = evaluate(statement, env)
-        match result:
-            case MReturnValue():
-                return result
-            case MError():
-                return result
-    return result
 
 
 def _error(obj):
     return isinstance(obj, MError)
 
 
-def _eval_expressions(arguments, env):
+def _eval_expressions(arguments, env) -> list:
     args = []
     for argument in arguments:
         evaluated = evaluate(argument, env)
         if _error(evaluated):
-            return evaluated
+            return [evaluated]
 
         args.append(evaluated)
     return args
@@ -196,8 +196,8 @@ def _apply_function(function, args):
             result = function.fn(args)
             if result is None:
                 return NULL
-            else:
-                return result
+            # else:
+            return result
         case _:
             return MError(f"not a function: {function.type_desc()}")
 
@@ -216,8 +216,8 @@ def _eval_hash_index_expression(pairs, index):
             pair = pairs.get(index.hash_key(), None)
             if pair is None:
                 return NULL
-            else:
-                return pair.value
+            # else:
+            return pair.value
         case _:
             return MError(f"unusable as a hash key: {index.type_desc()}")
 
@@ -249,7 +249,7 @@ def _eval_hash_literal(hash_pairs, env):
                 if _error(value):
                     return value
 
-                pairs[key.hash_key()] = HashKey(key, value)
+                pairs[key.hash_key()] = HashPair(key, value)
             case _:
                 return MError(f"unusable as hash key: {key.type_desc()}")
     return MHash(pairs)
@@ -278,17 +278,16 @@ def evaluate(node: Node, env: Environment):
         case IfExpression():
             return _eval_if_expression(node, env)
         case CallExpression(function, arguments):
-
             def body(f):
                 args = _eval_expressions(arguments, env)
                 if len(args) == 1 and _error(args[0]):
                     return args[0]
-                else:
-                    return _apply_function(f, args)
+                # else:
+                return _apply_function(f, args)
 
             return _if_not_error(evaluate(function, env), body)
         case ReturnStatement(value):
-            return _if_not_error(evaluate(value, env), lambda r: MReturnValue(r))
+            return _if_not_error(evaluate(value, env), MReturnValue)
         case PrefixExpression(operator, right):
             return _if_not_error(
                 evaluate(right, env), lambda r: _eval_prefix_expression(operator, r)
@@ -321,8 +320,8 @@ def evaluate(node: Node, env: Environment):
             elems = _eval_expressions(elements, env)
             if len(elems) == 1 and _error(elems[0]):
                 return elems[0]
-            else:
-                return MArray(elems)
+            # else
+            return MArray(elems)
         case _:
             print(f"{node} => {type(node)}")
             return None

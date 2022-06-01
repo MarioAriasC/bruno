@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum, auto
-from typing import NamedTuple
+from typing import NamedTuple, Any
 
 
 class HashType(IntEnum):
@@ -21,6 +21,11 @@ class MObject(ABC):
 
     def type_desc(self) -> str:
         return self.__class__.__name__
+
+
+class HashPair(NamedTuple):
+    key: MObject
+    value: Any
 
 
 class MValue(MObject):
@@ -111,8 +116,8 @@ class MBoolean(Hashable):
             case MBoolean(value):
                 if self is other:
                     return True
-                else:
-                    return self.value == value
+
+                return self.value == value
             case _:
                 return False
 
@@ -177,8 +182,8 @@ def _arg_size_check(expected_size, args, body):
     length = len(args)
     if length == expected_size:
         return body(args)
-    else:
-        return MError(f"wrong number of arguments. got={length}, want={expected_size}")
+
+    return MError(f"wrong number of arguments. got={length}, want={expected_size}")
 
 
 def _array_check(name, args, body):

@@ -137,9 +137,9 @@ class Parser:
         if self._peek_token_is(token_type):
             self._next_token()
             return True
-        else:
-            self._peek_error(token_type)
-            return False
+
+        self._peek_error(token_type)
+        return False
 
     def _peek_token_is(self, token_type):
         # print("_peek_token_is")
@@ -214,6 +214,7 @@ class Parser:
         self._next_token()
 
         right = self._parse_expression(Precedence.PREFIX)
+        # print(f"parsePrefixExpression {token} {operator} {right}")
         return PrefixExpression(token, operator, right)
 
     def _parse_infix_expression(self, left: Expression | None):

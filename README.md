@@ -3,7 +3,7 @@
 [Python 3.10](https://www.python.org/) implementation of
 the [Monkey Language](https://monkeylang.org/)
 
-Pepa has many sibling implementations
+Bruno has many sibling implementations
 
 * Kotlin: [monkey.kt](https://github.com/MarioAriasC/monkey.kt)
 * Crystal: [Monyet](https://github.com/MarioAriasC/monyet)
@@ -12,7 +12,7 @@ Pepa has many sibling implementations
 
 ## Status
 
-The book ([Writing An Interpreter In Go](https://interpreterbook.com/)) is fully implemented. Pepa will not have a
+The book ([Writing An Interpreter In Go](https://interpreterbook.com/)) is fully implemented. Bruno will not have a
 compiler implementation
 
 ## Commands

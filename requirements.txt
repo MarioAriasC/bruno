@@ -1,3 +1,5 @@
 pytest==7.1.2
 flake8==4.0.1
 black==22.3.0
+pylint==2.13.8
+perflint==0.7.1

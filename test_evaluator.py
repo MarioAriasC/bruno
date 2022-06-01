@@ -301,8 +301,8 @@ def test_builtin_functions():
 def test_array_literal():
     result = _eval("[1, 2 * 2, 3 + 3]")
     assert 3 == len(result.elements)
-    for i, v in enumerate([1, 4, 6]):
-        assert_integer_object(result.elements[i], v)
+    for i, value in enumerate([1, 4, 6]):
+        assert_integer_object(result.elements[i], value)
 
 
 def test_array_index_expression():
@@ -334,8 +334,8 @@ def test_hash_literal():
     two: 1 + 1,
     "thr" + "ee": 6 / 2,
     4: 4,
-   	true: 5,
-    	false: 6
+    true: 5,
+    false: 6
     }"""
 
     result = _eval(input_source)
