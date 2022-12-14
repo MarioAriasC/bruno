@@ -114,10 +114,7 @@ class MBoolean(Hashable):
     def __eq__(self, other):
         match other:
             case MBoolean(value):
-                if self is other:
-                    return True
-
-                return self.value == value
+                return True if self is other else self.value == value
             case _:
                 return False
 
@@ -189,8 +186,8 @@ def _arg_size_check(expected_size, args, body):
 def _array_check(name, args, body):
     array = args[0]
     match array:
-        case MArray():
-            return body(array, len(array.elements))
+        case MArray(elements):
+            return body(array, len(elements))
         case _:
             return MError(
                 f"argument to `{name}` must be ARRAY, got {array.type_desc()}"

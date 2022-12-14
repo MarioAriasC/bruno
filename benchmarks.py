@@ -14,17 +14,40 @@ def _measure(body):
 
 def _fast_input(size):
     return (
-        """
+            """
+            let fibonacci = fn(x) {
+            if (x < 2) {
+                return x;
+            } else {
+                fibonacci(x - 1) + fibonacci(x - 2);
+            }
+        };
+        fibonacci("""
+            + str(size)
+            + """);"""
+    )
+
+
+def _tab(size):
+    return (
+            """
+            let fibRec = fn(n, buf) {
+          if(n > 2) {
+            let res = buf[0] + buf[1];
+            return fibRec(n - 1, [res, buf[0]]);  
+          }
+          return buf;
+        }                        
+                                
+                                
         let fibonacci = fn(x) {
-        if (x < 2) {
-            return x;
-        } else {
-            fibonacci(x - 1) + fibonacci(x - 2);
+          let res = [1,1]
+          return fibRec(x, res)[0]
         }
-    };
-    fibonacci("""
-        + str(size)
-        + """);"""
+        
+        fibonacci("""
+            + str(size)
+            + """);"""
     )
 
 
