@@ -108,16 +108,16 @@ def _eval_prefix_expression(operator, right):
 def _eval_infix_expression(operator: str, left: MObject, right: MObject):
     exp = (left, operator, right)
     match exp:
-        case (MInteger(), "+", MInteger()):
-            return left + right
-        case (MInteger(), "-", MInteger()):
-            return left - right
-        case (MInteger(), "*", MInteger()):
-            return left * right
-        case (MInteger(), "/", MInteger()):
-            return left / right
-        case (MInteger(), "<", MInteger()):
-            return _to_monkey(left < right)
+        case (MInteger(l), "+", MInteger(r)):
+            return MInteger(l + r)
+        case (MInteger(l), "-", MInteger(r)):
+            return MInteger(l - r)
+        case (MInteger(l), "*", MInteger(r)):
+            return MInteger(l * r)
+        case (MInteger(l), "/", MInteger(r)):
+            return MInteger(l / r)
+        case (MInteger(l), "<", MInteger(r)):
+            return _to_monkey(l < r)
         case (MInteger(), ">", MInteger()):
             return _to_monkey(left > right)
         case (MInteger(), "==", MInteger()):
