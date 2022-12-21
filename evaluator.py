@@ -1,7 +1,6 @@
 from astree import (
     Node,
     Program,
-    Statement,
     IntegerLiteral,
     ExpressionStatement,
     PrefixExpression,
@@ -17,7 +16,7 @@ from astree import (
     StringLiteral,
     IndexExpression,
     HashLiteral,
-    ArrayLiteral,
+    ArrayLiteral, Statement,
 )
 from objects import (
     MReturnValue,
@@ -53,22 +52,10 @@ class Environment:
         return self.outer[key] if obj is None and self.outer is not None else obj
 
 
-def _eval_program(statements: list[Statement], env):
-    result = None
-    for statement in statements:
-        result = evaluate(statement, env)
-        match result:
-            case MReturnValue(value):
-                return value
-            case MError():
-                return result
-    return result
-
-
 def _eval_block_statement(block_statement: BlockStatement, env):
     result = None
     for statement in block_statement.statements:
-        result = evaluate(statement, env)
+        result = _evaluate(statement, env)
         match result:
             case MReturnValue():
                 return result
@@ -147,13 +134,13 @@ def _to_monkey(value: bool):
 def _eval_if_expression(if_expression: IfExpression, env):
     def body(condition):
         if _is_truthy(condition):
-            return evaluate(if_expression.consequence, env)
+            return _evaluate(if_expression.consequence, env)
         if if_expression.alternative is not None:
-            return evaluate(if_expression.alternative, env)
+            return _evaluate(if_expression.alternative, env)
         # else:
         return NULL
 
-    return _if_not_error(evaluate(if_expression.condition, env), body)
+    return _if_not_error(_evaluate(if_expression.condition, env), body)
 
 
 def _error(obj):
@@ -163,7 +150,7 @@ def _error(obj):
 def _eval_expressions(arguments, env) -> list:
     args = []
     for argument in arguments:
-        evaluated = evaluate(argument, env)
+        evaluated = _evaluate(argument, env)
         if _error(evaluated):
             return [evaluated]
 
@@ -190,7 +177,7 @@ def _apply_function(function, args):
     match function:
         case MFunction():
             extend_env = _extend_function_env(function, args)
-            evaluated = evaluate(function.body, extend_env)
+            evaluated = _evaluate(function.body, extend_env)
             return _unwrap_return_value(evaluated)
         case MBuiltinFunction():
             result = function.fn(args)
@@ -240,12 +227,12 @@ def _eval_index_expression(left, index):
 def _eval_hash_literal(hash_pairs, env):
     pairs = {}
     for key_node, value_node in hash_pairs.items():
-        key = evaluate(key_node, env)
+        key = _evaluate(key_node, env)
         if _error(key):
             return key
         match key:
             case MValue():
-                value = evaluate(value_node, env)
+                value = _evaluate(value_node, env)
                 if _error(value):
                     return value
 
@@ -255,61 +242,72 @@ def _eval_hash_literal(hash_pairs, env):
     return MHash(pairs)
 
 
-def evaluate(node: Node, env: Environment):
+def evaluate(program: Program, env: Environment):
+    result = None
+    for statement in program.statements:
+        result = _evaluate(statement, env)
+        match result:
+            case MReturnValue(value):
+                return value
+            case MError():
+                return result
+
+    return result
+
+
+def _evaluate(node: Statement, env: Environment):
     match node:
-        case Program(statements):
-            return _eval_program(statements, env)
         case Identifier(value):
             return _eval_identifier(value, env)
         case IntegerLiteral(value):
             return MInteger(value)
         case InfixExpression(left, operator, right):
             return _if_not_error(
-                evaluate(left, env),
+                _evaluate(left, env),
                 lambda l: _if_not_error(
-                    evaluate(right, env),
+                    _evaluate(right, env),
                     lambda r: _eval_infix_expression(operator, l, r),
                 ),
             )
         case BlockStatement():
             return _eval_block_statement(node, env)
         case ExpressionStatement(expression):
-            return evaluate(expression, env)
+            return _evaluate(expression, env)
         case IfExpression():
             return _eval_if_expression(node, env)
         case CallExpression(function, arguments):
-            def body(f):
+            def call_body(f):
                 args = _eval_expressions(arguments, env)
                 if len(args) == 1 and _error(args[0]):
                     return args[0]
                 # else:
                 return _apply_function(f, args)
 
-            return _if_not_error(evaluate(function, env), body)
+            return _if_not_error(_evaluate(function, env), call_body)
         case ReturnStatement(value):
-            return _if_not_error(evaluate(value, env), MReturnValue)
+            return _if_not_error(_evaluate(value, env), MReturnValue)
         case PrefixExpression(operator, right):
             return _if_not_error(
-                evaluate(right, env), lambda r: _eval_prefix_expression(operator, r)
+                _evaluate(right, env), lambda r: _eval_prefix_expression(operator, r)
             )
         case BooleanLiteral(value):
             return _to_monkey(value)
         case LetStatement(name, value):
 
-            def body(val):
+            def let_body(val):
                 env[name.value] = val
 
-            return _if_not_error(evaluate(value, env), body)
+            return _if_not_error(_evaluate(value, env), let_body)
         case FunctionLiteral(parameters, body):
             return MFunction(parameters, body, env)
         case StringLiteral(value):
             return MString(value)
         case IndexExpression(left, index):
-            left_evaluated = evaluate(left, env)
+            left_evaluated = _evaluate(left, env)
             if _error(left_evaluated):
                 return left_evaluated
 
-            index_evaluated = evaluate(index, env)
+            index_evaluated = _evaluate(index, env)
             if _error(index_evaluated):
                 return index_evaluated
 
