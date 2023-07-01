@@ -1,3 +1,5 @@
+from typing import cast
+
 from astree import (
     Node,
     Program,
@@ -37,6 +39,7 @@ from objects import (
     MValue,
     HashPair,
 )
+from utils import nn
 
 
 class Environment:
@@ -54,8 +57,8 @@ class Environment:
 
 def _eval_block_statement(block_statement: BlockStatement, env):
     result = None
-    for statement in block_statement.statements:
-        result = _evaluate(statement, env)
+    for statement in nn(block_statement.statements):
+        result = _evaluate(nn(statement), env)
         match result:
             case MReturnValue():
                 return result
@@ -96,17 +99,17 @@ def _eval_infix_expression(operator: str, left: MObject, right: MObject):
     exp = (left, operator, right)
     match exp:
         case (MInteger(), "+", MInteger()):
-            return left + right
+            return cast(MInteger, left) + cast(MInteger, right)
         case (MInteger(), "-", MInteger()):
-            return left - right
+            return cast(MInteger, left) - cast(MInteger, right)
         case (MInteger(), "*", MInteger()):
-            return left * right
+            return cast(MInteger, left) * cast(MInteger, right)
         case (MInteger(), "/", MInteger()):
-            return left / right
+            return cast(MInteger, left) / cast(MInteger, right)
         case (MInteger(), "<", MInteger()):
-            return _to_monkey(left < right)
+            return _to_monkey(cast(MInteger, left) < cast(MInteger, right))
         case (MInteger(), ">", MInteger()):
-            return _to_monkey(left > right)
+            return _to_monkey(cast(MInteger, left) > cast(MInteger, right))
         case (MInteger(), "==", MInteger()):
             return _to_monkey(left == right)
         case (MInteger(), "!=", MInteger()):
@@ -140,7 +143,7 @@ def _eval_if_expression(if_expression: IfExpression, env):
         # else:
         return NULL
 
-    return _if_not_error(_evaluate(if_expression.condition, env), body)
+    return _if_not_error(_evaluate(nn(if_expression.condition), env), body)
 
 
 def _error(obj):
@@ -263,16 +266,16 @@ def _evaluate(node: Statement, env: Environment):
             return MInteger(value)
         case InfixExpression(left, operator, right):
             return _if_not_error(
-                _evaluate(left, env),
+                _evaluate(nn(left), env),
                 lambda l: _if_not_error(
-                    _evaluate(right, env),
+                    _evaluate(nn(right), env),
                     lambda r: _eval_infix_expression(operator, l, r),
                 ),
             )
         case BlockStatement():
             return _eval_block_statement(node, env)
         case ExpressionStatement(expression):
-            return _evaluate(expression, env)
+            return _evaluate(nn(expression), env)
         case IfExpression():
             return _eval_if_expression(node, env)
         case CallExpression(function, arguments):
@@ -283,12 +286,12 @@ def _evaluate(node: Statement, env: Environment):
                 # else:
                 return _apply_function(f, args)
 
-            return _if_not_error(_evaluate(function, env), call_body)
+            return _if_not_error(_evaluate(nn(function), env), call_body)
         case ReturnStatement(value):
-            return _if_not_error(_evaluate(value, env), MReturnValue)
+            return _if_not_error(_evaluate(nn(value), env), MReturnValue)
         case PrefixExpression(operator, right):
             return _if_not_error(
-                _evaluate(right, env), lambda r: _eval_prefix_expression(operator, r)
+                _evaluate(nn(right), env), lambda r: _eval_prefix_expression(operator, r)
             )
         case BooleanLiteral(value):
             return _to_monkey(value)
@@ -297,17 +300,17 @@ def _evaluate(node: Statement, env: Environment):
             def let_body(val):
                 env[name.value] = val
 
-            return _if_not_error(_evaluate(value, env), let_body)
+            return _if_not_error(_evaluate(nn(value), env), let_body)
         case FunctionLiteral(parameters, body):
             return MFunction(parameters, body, env)
         case StringLiteral(value):
             return MString(value)
         case IndexExpression(left, index):
-            left_evaluated = _evaluate(left, env)
+            left_evaluated = _evaluate(nn(left), env)
             if _error(left_evaluated):
                 return left_evaluated
 
-            index_evaluated = _evaluate(index, env)
+            index_evaluated = _evaluate(nn(index), env)
             if _error(index_evaluated):
                 return index_evaluated
 

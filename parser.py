@@ -22,6 +22,7 @@ from astree import (
 )
 from lexer import Lexer
 from tokens import TokenType, Token
+from utils import nn
 
 
 class Precedence(IntEnum):
@@ -40,7 +41,7 @@ class Parser:
         self._lexer = lexer
         self._cur_token: Token | None = None
         self._peek_token: Token | None = None
-        self._errors = []
+        self._errors:list[str] = []
         self._prefix_parsers = {
             TokenType.INT: self._parse_integer_literal,
             TokenType.TRUE: self._parse_boolean_literal,
@@ -218,7 +219,7 @@ class Parser:
         return PrefixExpression(token, operator, right)
 
     def _parse_infix_expression(self, left: Expression | None):
-        token = self._cur_token
+        token = nn(self._cur_token)
         operator = token.literal
         precedence = self._cur_precedence()
         self._next_token()
@@ -226,7 +227,7 @@ class Parser:
         return InfixExpression(token, left, operator, right)
 
     def _parse_call_expression(self, expression: Expression | None):
-        token = self._cur_token
+        token = nn(self._cur_token)
         arguments = self._parse_expression_list(TokenType.RPAREN)
         return CallExpression(token, expression, arguments)
 

@@ -34,10 +34,10 @@ def _parse(input_source):
     return parser.parse_program()
 
 
-def main():
+def benchmarks():
     env = Environment()
     _measure(lambda: evaluate(_parse(_fast_input(35)), env))
 
 
 if __name__ == "__main__":
-    main()
+    benchmarks()
