@@ -18,7 +18,7 @@ from astree import (
     StringLiteral,
     IndexExpression,
     HashLiteral,
-    ArrayLiteral, Statement,
+    ArrayLiteral, Statement, Expression,
 )
 from objects import (
     MReturnValue,
@@ -55,7 +55,7 @@ class Environment:
         return self.outer[key] if obj is None and self.outer is not None else obj
 
 
-def _eval_block_statement(block_statement: BlockStatement, env):
+def _eval_block_statement(block_statement: BlockStatement, env: Environment):
     result = None
     for statement in nn(block_statement.statements):
         result = _evaluate(nn(statement), env)
@@ -85,7 +85,7 @@ def _eval_bang_operator_expression(right):
     return TRUE
 
 
-def _eval_prefix_expression(operator, right):
+def _eval_prefix_expression(operator: str, right):
     match operator:
         case "!":
             return _eval_bang_operator_expression(right)
@@ -135,22 +135,24 @@ def _to_monkey(value: bool):
 
 
 def _eval_if_expression(if_expression: IfExpression, env):
-    def body(condition):
-        if _is_truthy(condition):
-            return _evaluate(if_expression.consequence, env)
-        if if_expression.alternative is not None:
-            return _evaluate(if_expression.alternative, env)
-        # else:
-        return NULL
-
-    return _if_not_error(_evaluate(nn(if_expression.condition), env), body)
+    condition = _evaluate(nn(if_expression.condition), env)
+    match condition:
+        case MError():
+            return condition
+        case _:
+            if _is_truthy(condition):
+                return _evaluate(if_expression.consequence, env)
+            if if_expression.alternative is not None:
+                return _evaluate(if_expression.alternative, env)
+            # else:
+            return NULL
 
 
 def _error(obj):
     return isinstance(obj, MError)
 
 
-def _eval_expressions(arguments, env) -> list:
+def _eval_expressions(arguments: list[Expression | None], env: Environment) -> list:
     args = []
     for argument in arguments:
         evaluated = _evaluate(argument, env)
@@ -192,7 +194,7 @@ def _apply_function(function, args):
             return MError(f"not a function: {function.type_desc()}")
 
 
-def _eval_identifier(identifier, env):
+def _eval_identifier(identifier: str, env: Environment):
     value = env[identifier]
     if value is not None:
         return value
@@ -279,14 +281,16 @@ def _evaluate(node: Statement, env: Environment):
         case IfExpression():
             return _eval_if_expression(node, env)
         case CallExpression(function, arguments):
-            def call_body(f):
-                args = _eval_expressions(arguments, env)
-                if len(args) == 1 and _error(args[0]):
-                    return args[0]
-                # else:
-                return _apply_function(f, args)
+            fn = _evaluate(nn(function), env)
+            match fn:
+                case MError():
+                    return fn
+                case _:
+                    args = _eval_expressions(arguments, env)
+                    if len(args) == 1 and _error(args[0]):
+                        return args[0]
 
-            return _if_not_error(_evaluate(nn(function), env), call_body)
+                    return _apply_function(fn, args)
         case ReturnStatement(value):
             return _if_not_error(_evaluate(nn(value), env), MReturnValue)
         case PrefixExpression(operator, right):
