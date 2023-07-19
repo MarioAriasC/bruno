@@ -1,7 +1,6 @@
 from typing import cast
 
 from astree import (
-    Node,
     Program,
     IntegerLiteral,
     ExpressionStatement,
@@ -107,17 +106,17 @@ def _eval_infix_expression(operator: str, left: MObject, right: MObject):
         case (MInteger(), "/", MInteger()):
             return cast(MInteger, left) / cast(MInteger, right)
         case (MInteger(), "<", MInteger()):
-            return _to_monkey(cast(MInteger, left) < cast(MInteger, right))
+            return MBoolean.from_bool(cast(MInteger, left) < cast(MInteger, right))
         case (MInteger(), ">", MInteger()):
-            return _to_monkey(cast(MInteger, left) > cast(MInteger, right))
+            return MBoolean.from_bool(cast(MInteger, left) > cast(MInteger, right))
         case (MInteger(), "==", MInteger()):
-            return _to_monkey(left == right)
+            return MBoolean.from_bool(left == right)
         case (MInteger(), "!=", MInteger()):
-            return _to_monkey(left != right)
+            return MBoolean.from_bool(left != right)
         case (_, "==", _):
-            return _to_monkey(left == right)
+            return MBoolean.from_bool(left == right)
         case (_, "!=", _):
-            return _to_monkey(left != right)
+            return MBoolean.from_bool(left != right)
         case (_, _, _) if left.type_desc() != right.type_desc():
             return MError(
                 f"type mismatch: {left.type_desc()} {operator} {right.type_desc()}"
@@ -128,10 +127,6 @@ def _eval_infix_expression(operator: str, left: MObject, right: MObject):
             return MError(
                 f"unknown operator: {left.type_desc()} {operator} {right.type_desc()}"
             )
-
-
-def _to_monkey(value: bool):
-    return MBoolean.from_bool(value)
 
 
 def _eval_if_expression(if_expression: IfExpression, env):
@@ -298,13 +293,15 @@ def _evaluate(node: Statement, env: Environment):
                 _evaluate(nn(right), env), lambda r: _eval_prefix_expression(operator, r)
             )
         case BooleanLiteral(value):
-            return _to_monkey(value)
+            return MBoolean.from_bool(value)
         case LetStatement(name, value):
-
-            def let_body(val):
-                env[name.value] = val
-
-            return _if_not_error(_evaluate(nn(value), env), let_body)
+            let = _evaluate(nn(value), env)
+            match let:
+                case MError():
+                    return let
+                case _:
+                    env[name.value] = let
+                    return let
         case FunctionLiteral(parameters, body):
             return MFunction(parameters, body, env)
         case StringLiteral(value):
