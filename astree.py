@@ -2,6 +2,7 @@ import abc
 from abc import ABC
 
 from tokens import Token
+from utils import nn
 
 
 class Node(ABC):
@@ -211,7 +212,7 @@ class CallExpression(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f'{self.function}({", ".join(str(argument) for argument in self.arguments)})'
+        return f'{self.function}({", ".join(str(argument) for argument in nn(self.arguments))})'
 
     def __hash__(self):
         return hash(str(self))
@@ -228,7 +229,7 @@ class ArrayLiteral(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f'[{", ".join(str(element) for element in self.elements)}]'
+        return f'[{", ".join(str(element) for element in nn(self.elements))}]'
 
     def __hash__(self):
         return hash(str(self))
@@ -312,7 +313,7 @@ class FunctionLiteral(Expression):
         return self._token
 
     def __str__(self) -> str:
-        return f"{self.token_literal()}({', '.join(str(parameter) for parameter in self.parameters)}) {self.body}"
+        return f"{self.token_literal()}({', '.join(str(parameter) for parameter in nn(self.parameters))}) {self.body}"
 
     def __hash__(self):
         return hash(str(self))
