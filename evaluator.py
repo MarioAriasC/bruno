@@ -35,7 +35,7 @@ from objects import (
     MArray,
     MHash,
     MValue,
-    HashPair,
+    HashPair, integer_pool,
 )
 
 
@@ -260,7 +260,7 @@ def _evaluate(node: Statement, env: Environment):
         case Identifier(value):
             return _eval_identifier(value, env)
         case IntegerLiteral(value):
-            return MInteger(value)
+            return integer_pool(value)
         case InfixExpression(left, operator, right):
             return _if_not_error(
                 _evaluate(left, env),

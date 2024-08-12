@@ -52,19 +52,19 @@ class MInteger(Hashable):
         return HashType.INTEGER
 
     def __neg__(self):
-        return MInteger(-self.value)
+        return integer_pool(-self.value)
 
     def __add__(self, other):
-        return MInteger(self.value + other.value)
+        return integer_pool(self.value + other.value)
 
     def __sub__(self, other):
-        return MInteger(self.value - other.value)
+        return integer_pool(self.value - other.value)
 
     def __mul__(self, other):
-        return MInteger(self.value * other.value)
+        return integer_pool(self.value * other.value)
 
     def __truediv__(self, other):
-        return MInteger(self.value / other.value)
+        return integer_pool(self.value / other.value)
 
     def __lt__(self, other):
         return self.value < other.value
@@ -75,6 +75,18 @@ class MInteger(Hashable):
                 return self.value == value
             case _:
                 return False
+
+
+_INTEGER_POOL = {}
+
+
+def integer_pool(value: int) -> MInteger:
+    try:
+        return _INTEGER_POOL[value]
+    except KeyError:
+        integer = MInteger(value)
+        _INTEGER_POOL.update({value: integer})
+        return integer
 
 
 class MReturnValue(MObject):
@@ -202,9 +214,9 @@ def _len(args):
         arg = arguments[0]
         match arg:
             case MString(value):
-                return MInteger(len(value))
+                return integer_pool(len(value))
             case MArray(elements):
-                return MInteger(len(elements))
+                return integer_pool(len(elements))
             case _:
                 return MError(f"argument to `len` not supported, got {arg.type_desc()}")
 
